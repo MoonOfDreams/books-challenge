@@ -11,9 +11,14 @@ const mainController = {
       })
       .catch((error) => console.log(error));
   },
-  bookDetail: (req, res) => {
-    // Implement look for details in the database
-    res.render('bookDetail');
+  bookDetail: async(req, res) => {
+     let libro= await db.Book.findByPk(req.params.id,{
+      include: [{ association: 'authors' }]
+    }) ;
+      let autores=libro.authors.map(autor=>{
+        return autor.name
+     })
+    res.render('bookDetail',{libro, autores});
   },
   bookSearch: (req, res) => {
     res.render('search', { books: [] });
