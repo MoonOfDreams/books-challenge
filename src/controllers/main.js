@@ -44,9 +44,12 @@ const mainController = {
       })
       .catch((error) => console.log(error));
   },
-  authorBooks: (req, res) => {
-    // Implement books by author
-    res.render("authorBooks");
+  authorBooks:async (req, res) => {
+ let autor = await db.Author.findByPk(req.params.id,{
+      include:[{association:"books"}]
+    })
+    let libros=autor.books;
+    res.render("authorBooks",{libros});
   },
   register: (req, res) => {
     res.render("register");
