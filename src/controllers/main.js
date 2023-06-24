@@ -26,7 +26,7 @@ const mainController = {
     res.render("bookDetail", { libro, autores, session: req.session });
   },
   bookSearch: (req, res) => {
-    res.render("search", { libros: [],session: req.session });
+    res.render("search", {  session: req.session });
   },
   bookSearchResult: async (req, res) => {
     let libros = await db.Book.findAll({
@@ -35,10 +35,15 @@ const mainController = {
       },
       include: [{ association: "authors" }],
     });
-    res.render("search", { libros,session: req.session  });
+    res.render("search", { libros, session: req.session });
   },
 
   deleteBook: async (req, res) => {
+    await db.BookAuthor.destroy({
+      where: {
+        BookId: req.params.id,
+      },
+    });
     await db.Book.destroy({
       where: {
         id: req.params.id,
@@ -49,7 +54,7 @@ const mainController = {
   authors: (req, res) => {
     db.Author.findAll()
       .then((authors) => {
-        res.render("authors", { authors,session: req.session });
+        res.render("authors", { authors, session: req.session });
       })
       .catch((error) => console.log(error));
   },
@@ -58,10 +63,10 @@ const mainController = {
       include: [{ association: "books" }],
     });
     let libros = autor.books;
-    res.render("authorBooks", { libros,session: req.session});
+    res.render("authorBooks", { libros, session: req.session });
   },
   register: (req, res) => {
-    res.render("register",{session: req.session });
+    res.render("register", { session: req.session });
   },
   processRegister: async (req, res) => {
     let errores = validationResult(req);
@@ -78,12 +83,12 @@ const mainController = {
       return res.render("register", {
         mensajeDeError: errores.mapped(),
         old: req.body,
-        session: req.session 
+        session: req.session,
       });
     }
   },
   login: (req, res) => {
-    res.render("login",{session: req.session });
+    res.render("login", { session: req.session });
   },
   processLogin: async (req, res) => {
     let errores = validationResult(req);
@@ -98,11 +103,12 @@ const mainController = {
           isAdmin: user.CategoryId === 1 ? true : false,
         };
         req.session.user = userSession;
-        if(req.body.remember){ 
-          let tiempoCookies=new Date(Date.now()+60000)
-          res.cookie("userLogin", userSession,{
-            expires:tiempoCookies, httpOnly:true
-          })
+        if (req.body.remember) {
+          let tiempoCookies = new Date(Date.now() + 60000);
+          res.cookie("userLogin", userSession, {
+            expires: tiempoCookies,
+            httpOnly: true,
+          });
         }
         console.log("te encontre perra " + user.Email);
         res.redirect("/");
@@ -111,16 +117,16 @@ const mainController = {
       return res.render("login", {
         mensajeDeError: errores.mapped(),
         old: req.body,
-        session: req.session 
+        session: req.session,
       });
     }
   },
   logout: (req, res) => {
     req.session.destroy();
-    if(req.cookies.userLogin){ 
-      res.cookie("userLogin","",{
-       maxAge:-1
-      }) 
+    if (req.cookies.userLogin) {
+      res.cookie("userLogin", "", {
+        maxAge: -1,
+      });
     }
     res.redirect("/");
   },
@@ -128,7 +134,7 @@ const mainController = {
     let libro = await db.Book.findByPk(req.params.id, {
       include: [{ association: "authors" }],
     });
-    res.render("editBook", { libro,session: req.session });
+    res.render("editBook", { libro, session: req.session });
   },
   processEdit: async (req, res) => {
     let libroEditar = {
